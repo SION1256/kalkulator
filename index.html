@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CALC.EXE — SION</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+<div class="cyber-grid"></div>
+
+<div class="wrapper">
+  <div class="app-header">
+    <div class="app-title">CALC.EXE</div>
+    <div class="app-sub">// SYSTEM ONLINE — AI-POWERED CALCULATOR</div>
+    <div class="header-links">
+      <a class="header-link" href="https://sites.google.com/view/sioncyberterminal/sion" target="_blank" rel="noopener">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        SITE
+      </a>
+      <span class="header-link-divider">//</span>
+      <a class="header-link" href="https://github.com/SION1256" target="_blank" rel="noopener">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        GITHUB
+      </a>
+    </div>
+  </div>
+
+  <!-- OpenRouter Config -->
+  <div class="or-config">
+    <div class="or-key-bar">
+      <span class="or-key-label">OR-KEY:</span>
+      <input class="or-key-input" id="orKey" type="password" placeholder="Pakai key sendiri (opsional)">
+      <span class="or-key-status" id="keyStatus">DEFAULT</span>
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tab-calc" onclick="switchTab('calc')">⌨ KALKULATOR</button>
+    <button class="tab-btn" id="tab-ai" onclick="switchTab('ai')">◈ AI MATH</button>
+    <button class="tab-btn lang-toggle" onclick="toggleLang()" id="langBtn">🌐 EN</button>
+  </div>
+
+  <!-- ===== CALCULATOR PANEL ===== -->
+  <div class="panel active" id="panel-calc">
+    <div class="calc-container">
+      <div class="calc-display">
+        <div class="display-meta">
+          <span class="display-mode" id="angleMode">DEG</span>
+          <span class="display-mode mode-btn" onclick="toggleAngle()">RAD/DEG</span>
+        </div>
+        <div class="display-expr" id="calcExpr"></div>
+        <div class="display-result" id="calcResult">0</div>
+      </div>
+
+      <div class="calc-history" id="calcHistory">
+        <div class="history-item">// history empty</div>
+      </div>
+
+      <!-- Mode toggle -->
+      <div class="mode-bar">
+        <button class="mode-tab active" id="modeBasic" onclick="setMode('basic')">BASIC</button>
+        <button class="mode-tab" id="modeSci" onclick="setMode('sci')">SCIENTIFIC</button>
+      </div>
+
+      <!-- Basic buttons -->
+      <div class="calc-grid" id="gridBasic">
+        <button class="calc-btn ac" onclick="calcAC()">AC</button>
+        <button class="calc-btn op" onclick="calcDel()">⌫</button>
+        <button class="calc-btn op" onclick="calcPercent()">%</button>
+        <button class="calc-btn op" onclick="calcOp('/')">÷</button>
+
+        <button class="calc-btn" onclick="calcNum('7')">7</button>
+        <button class="calc-btn" onclick="calcNum('8')">8</button>
+        <button class="calc-btn" onclick="calcNum('9')">9</button>
+        <button class="calc-btn op" onclick="calcOp('*')">×</button>
+
+        <button class="calc-btn" onclick="calcNum('4')">4</button>
+        <button class="calc-btn" onclick="calcNum('5')">5</button>
+        <button class="calc-btn" onclick="calcNum('6')">6</button>
+        <button class="calc-btn op" onclick="calcOp('-')">−</button>
+
+        <button class="calc-btn" onclick="calcNum('1')">1</button>
+        <button class="calc-btn" onclick="calcNum('2')">2</button>
+        <button class="calc-btn" onclick="calcNum('3')">3</button>
+        <button class="calc-btn op" onclick="calcOp('+')">+</button>
+
+        <button class="calc-btn op" onclick="calcPlusMinus()">+/−</button>
+        <button class="calc-btn" onclick="calcNum('0')">0</button>
+        <button class="calc-btn" onclick="calcDot()">.</button>
+        <button class="calc-btn eq" onclick="calcEquals()">=</button>
+      </div>
+
+      <!-- Scientific buttons -->
+      <div class="calc-grid sci-grid" id="gridSci" style="display:none">
+        <button class="calc-btn ac" onclick="calcAC()">AC</button>
+        <button class="calc-btn op" onclick="calcDel()">⌫</button>
+        <button class="calc-btn op sci" onclick="calcOp('(')">(</button>
+        <button class="calc-btn op sci" onclick="calcOp(')')">)</button>
+        <button class="calc-btn op sci" onclick="calcPercent()">%</button>
+        <button class="calc-btn op" onclick="calcOp('/')">÷</button>
+
+        <button class="calc-btn sci" onclick="calcFn('sin')">sin</button>
+        <button class="calc-btn sci" onclick="calcFn('cos')">cos</button>
+        <button class="calc-btn sci" onclick="calcFn('tan')">tan</button>
+        <button class="calc-btn sci" onclick="calcFn('asin')">sin⁻¹</button>
+        <button class="calc-btn sci" onclick="calcFn('acos')">cos⁻¹</button>
+        <button class="calc-btn op" onclick="calcOp('*')">×</button>
+
+        <button class="calc-btn sci" onclick="calcFn('log')">log</button>
+        <button class="calc-btn sci" onclick="calcFn('ln')">ln</button>
+        <button class="calc-btn sci" onclick="calcFn('sqrt')">√</button>
+        <button class="calc-btn sci" onclick="calcFn('pow2')">x²</button>
+        <button class="calc-btn sci" onclick="calcOp('^')">xʸ</button>
+        <button class="calc-btn op" onclick="calcOp('-')">−</button>
+
+        <button class="calc-btn sci" onclick="calcConst('pi')">π</button>
+        <button class="calc-btn sci" onclick="calcConst('e')">e</button>
+        <button class="calc-btn sci" onclick="calcFn('abs')">|x|</button>
+        <button class="calc-btn sci" onclick="calcFn('fact')">n!</button>
+        <button class="calc-btn sci" onclick="calcFn('inv')">1/x</button>
+        <button class="calc-btn op" onclick="calcOp('+')">+</button>
+
+        <button class="calc-btn" onclick="calcNum('7')">7</button>
+        <button class="calc-btn" onclick="calcNum('8')">8</button>
+        <button class="calc-btn" onclick="calcNum('9')">9</button>
+        <button class="calc-btn" onclick="calcNum('4')">4</button>
+        <button class="calc-btn" onclick="calcNum('5')">5</button>
+        <button class="calc-btn eq" onclick="calcEquals()">=</button>
+
+        <button class="calc-btn" onclick="calcNum('6')">6</button>
+        <button class="calc-btn" onclick="calcNum('1')">1</button>
+        <button class="calc-btn" onclick="calcNum('2')">2</button>
+        <button class="calc-btn" onclick="calcNum('3')">3</button>
+        <button class="calc-btn op" onclick="calcPlusMinus()">+/−</button>
+        <button class="calc-btn" onclick="calcNum('0')">0</button>
+
+        <button class="calc-btn" style="grid-column:span 2" onclick="calcDot()">.</button>
+      </div>
+
+      <div class="status-bar">
+        <span class="status-text" id="calcStatus">// READY</span>
+        <span class="status-text">SION — CALC.EXE v2.0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== AI MATH PANEL ===== -->
+  <div class="panel" id="panel-ai">
+    <div class="ai-container">
+      <div class="ai-header">
+        <div class="ai-dot"></div>
+        <div class="ai-title">AI MATH</div>
+        <div class="ai-model-tag">mistralai/mistral-7b-instruct</div>
+      </div>
+
+      <div class="ai-messages" id="aiMessages">
+        <div class="msg ai">
+          <span class="msg-label">// AI</span>
+          <div class="msg-bubble">Halo! Gw AI Math Assistant lo. Tanya aja soal matematika dalam bahasa apapun — gw jelasin langkah-langkahnya.
+
+Contoh:
+• "berapa 15% dari 240?"
+• "kalau gw punya 3 apel dan dikasih 7 lagi..."
+• "hitung luas lingkaran dengan jari-jari 5"</div>
+        </div>
+      </div>
+
+      <div class="ai-input-area">
+        <input class="ai-input" id="aiInput" type="text" placeholder="Tanya soal matematika...">
+        <button class="ai-send-btn" id="aiSendBtn" onclick="sendAI()">SEND</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
