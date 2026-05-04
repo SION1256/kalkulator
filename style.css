@@ -679,8 +679,135 @@ body {
 
 .wrapper { animation: fadeIn 0.4s ease; }
 
+/* ===== CONVERTER ===== */
+.convert-container {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--glow);
+  padding: 20px;
+}
+
+.convert-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.convert-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan);
+  animation: pulse-dot 2s infinite;
+}
+
+.convert-title {
+  font-family: 'Orbitron';
+  font-size: 0.9rem;
+  color: var(--cyan);
+  letter-spacing: 3px;
+}
+
+.convert-category-select select {
+  background: rgba(0,5,15,0.8);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px 12px;
+  color: var(--text);
+  font-family: 'Share Tech Mono';
+  font-size: 0.75rem;
+  outline: none;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.convert-category-select select:focus {
+  border-color: var(--border-strong);
+  box-shadow: var(--glow);
+}
+
+.convert-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.convert-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.convert-label {
+  font-family: 'Share Tech Mono';
+  font-size: 0.7rem;
+  color: var(--dim);
+  letter-spacing: 2px;
+}
+
+.convert-input {
+  background: rgba(0,5,15,0.8);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 12px 14px;
+  color: var(--text);
+  font-family: 'Orbitron';
+  font-size: 1.2rem;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.convert-input:focus {
+  border-color: var(--border-strong);
+  box-shadow: var(--glow);
+}
+
+.convert-unit-select {
+  background: rgba(0,15,30,0.7);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px 12px;
+  color: var(--text);
+  font-family: 'Share Tech Mono';
+  font-size: 0.75rem;
+  outline: none;
+  cursor: pointer;
+}
+
+.convert-unit-select:focus {
+  border-color: var(--border-strong);
+  box-shadow: var(--glow);
+}
+
+.convert-equals {
+  text-align: center;
+  font-size: 1.5rem;
+  color: var(--cyan);
+  margin: 4px 0;
+}
+
+.convert-result {
+  background: rgba(0,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px;
+  text-align: center;
+  font-family: 'Share Tech Mono';
+  font-size: 0.8rem;
+  color: var(--dim);
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Responsive */
 @media (max-width: 540px) {
   .translate-boxes { grid-template-columns: 1fr; }
   .calc-btn { font-size: 1rem; }
+  .convert-header { flex-direction: column; align-items: stretch; }
+  .convert-category-select select { margin-left: 0; }
 }

@@ -41,6 +41,7 @@
   <!-- Tab Bar -->
   <div class="tab-bar">
     <button class="tab-btn active" id="tab-calc" onclick="switchTab('calc')">⌨ KALKULATOR</button>
+    <button class="tab-btn" id="tab-convert" onclick="switchTab('convert')">◈ KONVERSI</button>
     <button class="tab-btn" id="tab-ai" onclick="switchTab('ai')">◈ AI MATH</button>
     <button class="tab-btn lang-toggle" onclick="toggleLang()" id="langBtn">🌐 EN</button>
   </div>
@@ -145,6 +146,47 @@
       <div class="status-bar">
         <span class="status-text" id="calcStatus">// READY</span>
         <span class="status-text">SION — CALC.EXE v2.0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CONVERTER PANEL ===== -->
+  <div class="panel" id="panel-convert">
+    <div class="convert-container">
+      <div class="convert-header">
+        <div class="convert-dot"></div>
+        <div class="convert-title">UNIT CONVERTER</div>
+        <div class="convert-category-select">
+          <select id="convertCategory" onchange="changeCategory()">
+            <option value="currency">💰 Mata Uang</option>
+            <option value="length">📏 Panjang</option>
+            <option value="area">🔲 Area</option>
+            <option value="volume">🧊 Volume</option>
+            <option value="weight">⚖️ Berat</option>
+            <option value="temperature">🌡️ Suhu</option>
+            <option value="time">⏱️ Waktu</option>
+            <option value="speed">🚀 Kecepatan</option>
+            <option value="data">💾 Data</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="convert-body">
+        <div class="convert-input-group">
+          <label class="convert-label">DARI:</label>
+          <input type="number" id="convertFromValue" class="convert-input" value="1" oninput="convertFrom()">
+          <select id="convertFromUnit" class="convert-unit-select" onchange="convertFrom()"></select>
+        </div>
+
+        <div class="convert-equals">⬇</div>
+
+        <div class="convert-input-group">
+          <label class="convert-label">KE:</label>
+          <input type="number" id="convertToValue" class="convert-input" oninput="convertTo()">
+          <select id="convertToUnit" class="convert-unit-select" onchange="convertFrom()"></select>
+        </div>
+
+        <div class="convert-result" id="convertResult"></div>
       </div>
     </div>
   </div>

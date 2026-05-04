@@ -46,6 +46,7 @@ const LANG = {
     keyLabel: 'OR-KEY:',
     keyPlaceholder: 'sk-or-v1-xxxxxxxx (OpenRouter API Key)',
     tabCalc: '⌨ KALKULATOR',
+    tabConvert: '◈ KONVERSI',
     tabAI: '◈ AI MATH',
     calcStatus: '// SIAP',
     calcCleared: '// DIHAPUS',
@@ -63,12 +64,16 @@ Format jawaban dengan rapi. Gunakan angka dan simbol matematika yang mudah dibac
 Jika bukan soal matematika, tetap bantu tapi ingatkan kamu spesialis matematika.`,
     historyEmpty: '// riwayat kosong',
     footer: 'SION — CALC.EXE v1.0',
+    convertFrom: 'DARI:',
+    convertTo: 'KE:',
+    convertEnterValue: '// Masukkan nilai',
   },
   en: {
     appSub: '// SYSTEM ONLINE — AI-POWERED CALCULATOR',
     keyLabel: 'OR-KEY:',
     keyPlaceholder: 'sk-or-v1-xxxxxxxx (OpenRouter API Key)',
     tabCalc: '⌨ CALCULATOR',
+    tabConvert: '◈ CONVERTER',
     tabAI: '◈ AI MATH',
     calcStatus: '// READY',
     calcCleared: '// CLEARED',
@@ -86,6 +91,9 @@ Format answers neatly with numbers and math symbols.
 If not a math question, still help but note you specialize in math.`,
     historyEmpty: '// history empty',
     footer: 'SION — CALC.EXE v1.0',
+    convertFrom: 'FROM:',
+    convertTo: 'TO:',
+    convertEnterValue: '// Enter value',
   }
 };
 
@@ -103,6 +111,7 @@ function applyLang() {
   document.querySelector('.or-key-label').textContent = L.keyLabel;
   document.getElementById('orKey').placeholder = L.keyPlaceholder;
   document.getElementById('tab-calc').textContent = L.tabCalc;
+  document.getElementById('tab-convert').textContent = L.tabConvert;
   document.getElementById('tab-ai').textContent = L.tabAI;
   document.getElementById('calcStatus').textContent = L.calcStatus;
   document.getElementById('aiInput').placeholder = L.aiPlaceholder;
@@ -469,3 +478,159 @@ function showTyping() {
 document.getElementById('aiInput').addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAI(); }
 });
+
+// ===== UNIT CONVERTER =====
+const unitData = {
+  currency: {
+    units: ['USD', 'IDR', 'EUR', 'GBP', 'JPY', 'CNY', 'SGD', 'AUD', 'CAD', 'CHF'],
+    rates: { USD: 1, IDR: 15650, EUR: 0.92, GBP: 0.79, JPY: 149.5, CNY: 7.23, SGD: 1.34, AUD: 1.53, CAD: 1.36, CHF: 0.88 }
+  },
+  length: {
+    units: ['Meter', 'Kilometer', 'Centimeter', 'Millimeter', 'Inch', 'Foot', 'Yard', 'Mile', 'Nautical Mile'],
+    rates: { Meter: 1, Kilometer: 0.001, Centimeter: 100, Millimeter: 1000, Inch: 39.3701, Foot: 3.28084, Yard: 1.09361, Mile: 0.000621371, 'Nautical Mile': 0.000539957 }
+  },
+  area: {
+    units: ['Square Meter', 'Square Kilometer', 'Square Centimeter', 'Hectare', 'Acre', 'Square Foot', 'Square Inch', 'Square Mile'],
+    rates: { 'Square Meter': 1, 'Square Kilometer': 0.000001, 'Square Centimeter': 10000, Hectare: 0.0001, Acre: 0.000247105, 'Square Foot': 10.7639, 'Square Inch': 1550, 'Square Mile': 3.861e-7 }
+  },
+  volume: {
+    units: ['Liter', 'Milliliter', 'Cubic Meter', 'Gallon (US)', 'Quart (US)', 'Pint (US)', 'Cup (US)', 'Fluid Ounce (US)'],
+    rates: { Liter: 1, Milliliter: 1000, 'Cubic Meter': 0.001, 'Gallon (US)': 0.264172, 'Quart (US)': 1.05669, 'Pint (US)': 2.11338, 'Cup (US)': 4.22675, 'Fluid Ounce (US)': 33.814 }
+  },
+  weight: {
+    units: ['Kilogram', 'Gram', 'Milligram', 'Ton (Metric)', 'Pound', 'Ounce', 'Stone'],
+    rates: { Kilogram: 1, Gram: 1000, Milligram: 1000000, 'Ton (Metric)': 0.001, Pound: 2.20462, Ounce: 35.274, Stone: 0.157473 }
+  },
+  temperature: {
+    units: ['Celsius', 'Fahrenheit', 'Kelvin'],
+    rates: null // Special handling
+  },
+  time: {
+    units: ['Second', 'Minute', 'Hour', 'Day', 'Week', 'Month', 'Year', 'Millisecond'],
+    rates: { Second: 1, Minute: 1/60, Hour: 1/3600, Day: 1/86400, Week: 1/604800, Month: 1/2628000, Year: 1/31536000, Millisecond: 1000 }
+  },
+  speed: {
+    units: ['m/s', 'km/h', 'mph', 'knot', 'ft/s'],
+    rates: { 'm/s': 1, 'km/h': 3.6, mph: 2.23694, knot: 1.94384, 'ft/s': 3.28084 }
+  },
+  data: {
+    units: ['Byte', 'Kilobyte', 'Megabyte', 'Gigabyte', 'Terabyte', 'Petabyte', 'Bit', 'Kilobit', 'Megabit', 'Gigabit'],
+    rates: { Byte: 1, Kilobyte: 0.001, Megabyte: 0.000001, Gigabyte: 1e-9, Terabyte: 1e-12, Petabyte: 1e-15, Bit: 8, Kilobit: 0.008, Megabit: 8e-6, Gigabit: 8e-9 }
+  }
+};
+
+let currentCategory = 'currency';
+
+function changeCategory() {
+  currentCategory = document.getElementById('convertCategory').value;
+  const fromSelect = document.getElementById('convertFromUnit');
+  const toSelect = document.getElementById('convertToUnit');
+  
+  fromSelect.innerHTML = '';
+  toSelect.innerHTML = '';
+  
+  unitData[currentCategory].units.forEach((unit, index) => {
+    fromSelect.innerHTML += `<option value="${unit}">${unit}</option>`;
+    toSelect.innerHTML += `<option value="${unit}" ${index === 1 ? 'selected' : ''}>${unit}</option>`;
+  });
+  
+  convertFrom();
+}
+
+function convertTemperature(value, fromUnit, toUnit, direction) {
+  let celsius;
+  if (direction === 'from') {
+    // Convert to Celsius first
+    if (fromUnit === 'Celsius') celsius = value;
+    else if (fromUnit === 'Fahrenheit') celsius = (value - 32) * 5/9;
+    else if (fromUnit === 'Kelvin') celsius = value - 273.15;
+    
+    // Then convert to target unit
+    if (toUnit === 'Celsius') return celsius;
+    else if (toUnit === 'Fahrenheit') return celsius * 9/5 + 32;
+    else if (toUnit === 'Kelvin') return celsius + 273.15;
+  } else {
+    // Reverse conversion
+    if (toUnit === 'Celsius') celsius = value;
+    else if (toUnit === 'Fahrenheit') celsius = (value - 32) * 5/9;
+    else if (toUnit === 'Kelvin') celsius = value - 273.15;
+    
+    if (fromUnit === 'Celsius') return celsius;
+    else if (fromUnit === 'Fahrenheit') return celsius * 9/5 + 32;
+    else if (fromUnit === 'Kelvin') return celsius + 273.15;
+  }
+  return value;
+}
+
+function convertFrom() {
+  const fromValue = parseFloat(document.getElementById('convertFromValue').value);
+  const fromUnit = document.getElementById('convertFromUnit').value;
+  const toUnit = document.getElementById('convertToUnit').value;
+  const toInput = document.getElementById('convertToValue');
+  const resultDiv = document.getElementById('convertResult');
+  
+  if (isNaN(fromValue)) {
+    toInput.value = '';
+    resultDiv.textContent = '// Masukkan nilai';
+    return;
+  }
+  
+  let result;
+  
+  if (currentCategory === 'temperature') {
+    result = convertTemperature(fromValue, fromUnit, toUnit, 'from');
+  } else {
+    const rates = unitData[currentCategory].rates;
+    const baseValue = fromValue / rates[fromUnit];
+    result = baseValue * rates[toUnit];
+  }
+  
+  // Format result
+  let displayResult;
+  if (Math.abs(result) < 0.000001 || Math.abs(result) > 1000000) {
+    displayResult = result.toExponential(6);
+  } else {
+    displayResult = parseFloat(result.toFixed(6)).toString();
+  }
+  
+  toInput.value = displayResult;
+  resultDiv.textContent = `${fromValue} ${fromUnit} = ${displayResult} ${toUnit}`;
+}
+
+function convertTo() {
+  const toValue = parseFloat(document.getElementById('convertToValue').value);
+  const fromUnit = document.getElementById('convertFromUnit').value;
+  const toUnit = document.getElementById('convertToUnit').value;
+  const fromInput = document.getElementById('convertFromValue');
+  const resultDiv = document.getElementById('convertResult');
+  
+  if (isNaN(toValue)) {
+    fromInput.value = '';
+    resultDiv.textContent = '// Masukkan nilai';
+    return;
+  }
+  
+  let result;
+  
+  if (currentCategory === 'temperature') {
+    result = convertTemperature(toValue, fromUnit, toUnit, 'to');
+  } else {
+    const rates = unitData[currentCategory].rates;
+    const baseValue = toValue / rates[toUnit];
+    result = baseValue * rates[fromUnit];
+  }
+  
+  // Format result
+  let displayResult;
+  if (Math.abs(result) < 0.000001 || Math.abs(result) > 1000000) {
+    displayResult = result.toExponential(6);
+  } else {
+    displayResult = parseFloat(result.toFixed(6)).toString();
+  }
+  
+  fromInput.value = displayResult;
+  resultDiv.textContent = `${toValue} ${toUnit} = ${displayResult} ${fromUnit}`;
+}
+
+// Initialize converter on load
+changeCategory();
