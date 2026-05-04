@@ -60,7 +60,14 @@ const LANG = {
     aiSysPrompt: `Kamu adalah AI Math Assistant yang helpful dan friendly. 
 Jawab pertanyaan matematika dalam bahasa yang sama dengan user (Indonesia atau English).
 Selalu tunjukkan langkah-langkah penyelesaiannya dengan jelas.
-Format jawaban dengan rapi. Gunakan angka dan simbol matematika yang mudah dibaca.
+
+PENTING - Format Output:
+1. Gunakan format LaTeX/KaTeX untuk rumus matematika dengan delimiter $$...$$ untuk display math atau $...$ untuk inline math.
+2. Untuk angka ribuan, gunakan titik sebagai pemisah (contoh: 10.000 bukan 10000).
+3. Untuk tabel, gunakan format markdown table.
+4. Untuk coding, gunakan code block dengan triple backticks.
+5. Jawaban harus rapi dan mudah dibaca.
+
 Jika bukan soal matematika, tetap bantu tapi ingatkan kamu spesialis matematika.`,
     historyEmpty: '// riwayat kosong',
     footer: 'SION — CALC.EXE v1.0',
@@ -87,7 +94,14 @@ Jika bukan soal matematika, tetap bantu tapi ingatkan kamu spesialis matematika.
     aiSysPrompt: `You are a helpful and friendly AI Math Assistant.
 Answer math questions clearly and show step-by-step solutions.
 Match the language of the user (English or Indonesian).
-Format answers neatly with numbers and math symbols.
+
+IMPORTANT - Output Format:
+1. Use LaTeX/KaTeX format for math formulas with $$...$$ for display math or $...$ for inline math.
+2. For thousands separator, use dot (example: 10.000 not 10000).
+3. For tables, use markdown table format.
+4. For code, use code blocks with triple backticks.
+5. Keep answers neat and readable.
+
 If not a math question, still help but note you specialize in math.`,
     historyEmpty: '// history empty',
     footer: 'SION — CALC.EXE v1.0',
@@ -206,6 +220,8 @@ function calcOp(op) {
   }
   document.getElementById('calcStatus').textContent = '// INPUT';
   updateDisplay();
+  // Reset display untuk input angka berikutnya
+  displayValue = '0';
 }
 
 // Fungsi scientific (sin, cos, tan, dll)
@@ -415,9 +431,35 @@ async function callOR(messages, systemPrompt) {
   const data = await res.json();
   return data.choices[0].message.content;
 }
-
 // ===== AI MATH =====
 const aiHistory = [];
+
+// System prompt with LaTeX/KaTeX instructions
+const AI_SYS_PROMPT_ID = `Kamu adalah AI Math Assistant yang helpful dan friendly. 
+Jawab pertanyaan matematika dalam bahasa yang sama dengan user (Indonesia atau English).
+Selalu tunjukkan langkah-langkah penyelesaiannya dengan jelas.
+
+PENTING - Format Output:
+1. Gunakan format LaTeX/KaTeX untuk rumus matematika dengan delimiter $$...$$ untuk display math atau $...$ untuk inline math.
+2. Untuk angka ribuan, gunakan titik sebagai pemisah (contoh: 10.000 bukan 10000).
+3. Untuk tabel, gunakan format markdown table.
+4. Untuk coding, gunakan code block dengan triple backticks.
+5. Jawaban harus rapi dan mudah dibaca.
+
+Jika bukan soal matematika, tetap bantu tapi ingatkan kamu spesialis matematika.`;
+
+const AI_SYS_PROMPT_EN = `You are a helpful and friendly AI Math Assistant.
+Answer math questions clearly and show step-by-step solutions.
+Match the language of the user (English or Indonesian).
+
+IMPORTANT - Output Format:
+1. Use LaTeX/KaTeX format for math formulas with $$...$$ for display math or $...$ for inline math.
+2. For thousands separator, use dot (example: 10.000 not 10000).
+3. For tables, use markdown table format.
+4. For code, use code blocks with triple backticks.
+5. Keep answers neat and readable.
+
+If not a math question, still help but note you specialize in math.`;
 
 async function sendAI() {
   const input = document.getElementById('aiInput');
@@ -433,10 +475,11 @@ async function sendAI() {
   const typingEl = showTyping();
 
   try {
-    const reply = await callOR(aiHistory, LANG[currentLang].aiSysPrompt);
+    const sysPrompt = currentLang === 'id' ? AI_SYS_PROMPT_ID : AI_SYS_PROMPT_EN;
+    const reply = await callOR(aiHistory, sysPrompt);
     typingEl.remove();
     aiHistory.push({ role: 'assistant', content: reply });
-    appendMsg('ai', reply);
+    appendMsg('ai', reply, true);
   } catch(e) {
     typingEl.remove();
     appendMsg('ai', `⚠ Error: ${e.message}`);
@@ -445,38 +488,115 @@ async function sendAI() {
   btn.disabled = false;
 }
 
-function appendMsg(role, text) {
+function renderLaTeX(container) {
+  const bubbles = container.querySelectorAll('.msg-bubble');
+  bubbles.forEach(bubble => {
+    let html = bubble.innerHTML;
+    
+    // Render display math $$...$$
+    html = html.replace(/\$\$([\s\S]*?)\$\$/g, (match, latex) => {
+      try {
+        return katex.renderToString(latex.trim(), { displayMode: true, throwOnError: false });
+      } catch(e) { return match; }
+    });
+    
+    // Render inline math $...$
+    html = html.replace(/\$([^\n$]+?)\$/g, (match, latex) => {
+      try {
+        return katex.renderToString(latex.trim(), { displayMode: false, throwOnError: false });
+      } catch(e) { return match; }
+    });
+    
+    bubble.innerHTML = html;
+  });
+}
+
+function appendMsg(role, text, renderLatex = false) {
   const container = document.getElementById('aiMessages');
   const el = document.createElement('div');
   el.className = `msg ${role}`;
-  el.innerHTML = `
-    <span class="msg-label">// ${role === 'user' ? 'YOU' : 'AI'}</span>
-    <div class="msg-bubble">${text.replace(/</g, '&lt;').replace(/\n/g, '<br>')}</div>
-  `;
+  
+  const msgContent = document.createElement('div');
+  msgContent.style.width = '100%';
+  
+  const labelEl = document.createElement('span');
+  labelEl.className = 'msg-label';
+  labelEl.textContent = `// ${role === 'user' ? 'YOU' : 'AI'}`;
+  
+  const bubbleEl = document.createElement('div');
+  bubbleEl.className = 'msg-bubble';
+  
+  let processedText = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  
+  const codeBlocks = [];
+  processedText = processedText.replace(/```([\s\S]*?)```/g, (match, code) => {
+    codeBlocks.push(code);
+    return `%%CODEBLOCK${codeBlocks.length - 1}%%`;
+  });
+  
+  processedText = processedText.replace(/\n/g, '<br>');
+  
+  processedText = processedText.replace(/%%CODEBLOCK(\d+)%%/g, (match, idx) => {
+    return `<pre class="code-block"><code>${codeBlocks[idx]}</code></pre>`;
+  });
+  
+  bubbleEl.innerHTML = processedText;
+  
+  msgContent.appendChild(labelEl);
+  msgContent.appendChild(bubbleEl);
+  
+  if (role === 'ai') {
+    const actionsEl = document.createElement('div');
+    actionsEl.className = 'msg-actions';
+    actionsEl.innerHTML = `
+      <button class="msg-action-btn" onclick="copyMessage(this)">📋 COPY</button>
+      <button class="msg-action-btn" onclick="retryMessage(this)">🔄 RETRY</button>
+    `;
+    msgContent.appendChild(actionsEl);
+    el.dataset.originalText = text;
+  }
+  
+  el.appendChild(msgContent);
   container.appendChild(el);
   container.scrollTop = container.scrollHeight;
+  
+  if (renderLatex) {
+    renderLaTeX(container);
+  }
 }
 
-function showTyping() {
-  const container = document.getElementById('aiMessages');
-  const el = document.createElement('div');
-  el.className = 'msg ai';
-  el.innerHTML = `
-    <span class="msg-label">// AI</span>
-    <div class="typing-indicator">
-      <div class="typing-dot"></div>
-      <div class="typing-dot"></div>
-      <div class="typing-dot"></div>
-    </div>
-  `;
-  container.appendChild(el);
-  container.scrollTop = container.scrollHeight;
-  return el;
+function copyMessage(btn) {
+  const msgEl = btn.closest('.msg');
+  const bubble = msgEl.querySelector('.msg-bubble');
+  const text = bubble.innerText;
+  
+  navigator.clipboard.writeText(text).then(() => {
+    const originalText = btn.textContent;
+    btn.textContent = '✓ COPIED!';
+    setTimeout(() => { btn.textContent = originalText; }, 2000);
+  }).catch(err => { console.error('Failed to copy:', err); });
 }
 
-document.getElementById('aiInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAI(); }
-});
+function retryMessage(btn) {
+  const msgEl = btn.closest('.msg');
+  const originalText = msgEl.dataset.originalText;
+  
+  if (!originalText) return;
+  
+  const lastMsg = aiHistory[aiHistory.length - 1];
+  if (lastMsg && lastMsg.role === 'assistant') {
+    aiHistory.pop();
+  }
+  
+  msgEl.remove();
+  
+  const lastUserMsg = aiHistory[aiHistory.length - 1];
+  if (lastUserMsg && lastUserMsg.role === 'user') {
+    const input = document.getElementById('aiInput');
+    input.value = lastUserMsg.content;
+    sendAI();
+  }
+}
 
 // ===== UNIT CONVERTER =====
 const unitData = {
@@ -633,3 +753,24 @@ function convertTo() {
 
 // Initialize converter on load
 changeCategory();
+
+function showTyping() {
+  const container = document.getElementById('aiMessages');
+  const el = document.createElement('div');
+  el.className = 'msg ai';
+  el.innerHTML = `
+    <span class="msg-label">// AI</span>
+    <div class="typing-indicator">
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+    </div>
+  `;
+  container.appendChild(el);
+  container.scrollTop = container.scrollHeight;
+  return el;
+}
+
+document.getElementById('aiInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAI(); }
+});
