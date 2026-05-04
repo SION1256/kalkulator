@@ -173,7 +173,6 @@ function updateDisplay() {
 function calcNum(v) {
   if (shouldResetDisplay) {
     displayValue = v;
-    expression = '';
     shouldResetDisplay = false;
   } else {
     displayValue = displayValue === '0' && v !== '.' ? v : displayValue + v;
