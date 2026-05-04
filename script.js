@@ -127,14 +127,12 @@ function switchTab(tab) {
   document.getElementById('tab-' + tab).classList.add('active');
 }
 
-// ===== CALCULATOR =====
-let calcState = {
-  current: '0',
-  expr: '',
-  history: [],
-  justCalc: false,
-  angleMode: 'deg'
-};
+// ===== CALCULATOR (SIMPLE VERSION) =====
+let displayValue = '0';
+let expression = '';
+let shouldResetDisplay = false;
+let calcHistory = [];
+let angleMode = 'deg';
 let calcMode = 'basic';
 
 function setMode(m) {
@@ -146,8 +144,8 @@ function setMode(m) {
 }
 
 function toggleAngle() {
-  calcState.angleMode = calcState.angleMode === 'deg' ? 'rad' : 'deg';
-  document.getElementById('angleMode').textContent = calcState.angleMode.toUpperCase();
+  angleMode = angleMode === 'deg' ? 'rad' : 'deg';
+  document.getElementById('angleMode').textContent = angleMode.toUpperCase();
 }
 
 function toRad(deg) { return deg * Math.PI / 180; }
@@ -158,48 +156,56 @@ function prettyDisplay(expr) {
 }
 
 function updateDisplay() {
-  document.getElementById('calcResult').textContent = calcState.current;
-  document.getElementById('calcExpr').textContent = prettyDisplay(calcState.expr);
+  document.getElementById('calcResult').textContent = displayValue;
+  document.getElementById('calcExpr').textContent = prettyDisplay(expression);
 }
 
+// Input angka - SIMPLE & LANGSUNG
 function calcNum(v) {
-  if (calcState.justCalc) { calcState.current = ''; calcState.expr = ''; calcState.justCalc = false; }
-  if (calcState.current === '0' && v !== '.') calcState.current = v;
-  else if (calcState.current.length < 16) calcState.current += v;
-  document.getElementById('calcStatus').textContent = '// INPUT';
-  updateDisplay();
-}
-
-function calcDot() {
-  if (calcState.justCalc) { calcState.current = '0'; calcState.expr = ''; calcState.justCalc = false; }
-  if (!calcState.current.includes('.')) calcState.current += '.';
-  updateDisplay();
-}
-
-function calcOp(op) {
-  if (calcState.justCalc) calcState.justCalc = false;
-  if (op === '(' || op === ')') {
-    calcState.expr += op;
-    calcState.current = '';
-    updateDisplay();
-    return;
-  }
-  const lastChar = calcState.expr.slice(-1);
-  if (['+','-','*','/','^'].includes(lastChar)) {
-    calcState.expr = calcState.expr.slice(0, -1) + op;
+  if (shouldResetDisplay) {
+    displayValue = v;
+    expression = '';
+    shouldResetDisplay = false;
   } else {
-    if (calcState.current) { calcState.expr += calcState.current + op; calcState.current = ''; }
-    else if (calcState.expr) calcState.expr += op;
+    displayValue = displayValue === '0' && v !== '.' ? v : displayValue + v;
+  }
+  if (displayValue.length > 16) displayValue = displayValue.slice(0, 16);
+  document.getElementById('calcStatus').textContent = '// INPUT';
+  updateDisplay();
+}
+
+// Titik desimal
+function calcDot() {
+  if (shouldResetDisplay) {
+    displayValue = '0.';
+    expression = '';
+    shouldResetDisplay = false;
+  } else if (!displayValue.includes('.')) {
+    displayValue += '.';
+  }
+  updateDisplay();
+}
+
+// Operator (+ - * / ^)
+function calcOp(op) {
+  const value = displayValue;
+  if (expression && shouldResetDisplay) {
+    // Ganti operator terakhir jika user ganti pikiran
+    expression = expression.slice(0, -1) + op;
+  } else {
+    expression += value + op;
+    shouldResetDisplay = true;
   }
   document.getElementById('calcStatus').textContent = '// INPUT';
   updateDisplay();
 }
 
+// Fungsi scientific (sin, cos, tan, dll)
 function calcFn(fn) {
-  if (calcState.justCalc) calcState.justCalc = false;
-  const val = parseFloat(calcState.current);
-  const isDeg = calcState.angleMode === 'deg';
+  const val = parseFloat(displayValue);
+  const isDeg = angleMode === 'deg';
   let result;
+  
   switch(fn) {
     case 'sin':  result = Math.sin(isDeg ? toRad(val) : val); break;
     case 'cos':  result = Math.cos(isDeg ? toRad(val) : val); break;
@@ -213,104 +219,149 @@ function calcFn(fn) {
     case 'abs':  result = Math.abs(val); break;
     case 'inv':  result = 1 / val; break;
     case 'fact':
-      if (val < 0 || !Number.isInteger(val)) { calcState.current = 'ERR'; updateDisplay(); return; }
-      result = 1; for (let i = 2; i <= val; i++) result *= i; break;
+      if (val < 0 || !Number.isInteger(val)) { 
+        displayValue = 'ERR'; 
+        updateDisplay(); 
+        return; 
+      }
+      result = 1; 
+      for (let i = 2; i <= val; i++) result *= i; 
+      break;
     default: return;
   }
+  
   const labels = {sin:'sin',cos:'cos',tan:'tan',asin:'sin⁻¹',acos:'cos⁻¹',log:'log',ln:'ln',sqrt:'√',pow2:'x²',abs:'|x|',inv:'1/x',fact:'n!'};
   const display = parseFloat(result.toFixed(10)).toString();
-  const histEntry = `${labels[fn]}(${val}) = ${display}`;
-  calcState.history.unshift(histEntry);
-  if (calcState.history.length > 8) calcState.history.pop();
-  calcState.expr = `${labels[fn]}(${val}) =`;
-  calcState.current = display;
-  calcState.justCalc = true;
+  
+  // Simpan ke history
+  calcHistory.unshift(`${labels[fn]}(${val}) = ${display}`);
+  if (calcHistory.length > 8) calcHistory.pop();
+  
+  expression = `${labels[fn]}(${val}) =`;
+  displayValue = display;
+  shouldResetDisplay = true;
+  
   document.getElementById('calcStatus').textContent = '// COMPUTED';
   updateHistory();
   updateDisplay();
 }
 
+// Konstanta (π, e)
 function calcConst(c) {
-  if (calcState.justCalc) { calcState.current = ''; calcState.expr = ''; calcState.justCalc = false; }
-  calcState.current = c === 'pi' ? String(Math.PI) : String(Math.E);
+  displayValue = c === 'pi' ? String(Math.PI) : String(Math.E);
+  shouldResetDisplay = true;
   updateDisplay();
 }
 
+// Persen
 function calcPercent() {
-  if (!calcState.current) return;
-  calcState.current = String(parseFloat(calcState.current) / 100);
+  displayValue = String(parseFloat(displayValue) / 100);
   updateDisplay();
 }
 
+// Plus/Minus
 function calcPlusMinus() {
-  if (!calcState.current || calcState.current === '0') return;
-  calcState.current = calcState.current.startsWith('-') ? calcState.current.slice(1) : '-' + calcState.current;
+  if (displayValue === '0') return;
+  displayValue = displayValue.startsWith('-') ? displayValue.slice(1) : '-' + displayValue;
   updateDisplay();
 }
 
+// Delete satu karakter
 function calcDel() {
-  if (calcState.justCalc) { calcAC(); return; }
-  calcState.current = calcState.current.length > 1 ? calcState.current.slice(0, -1) : '0';
+  if (shouldResetDisplay) {
+    calcAC();
+    return;
+  }
+  displayValue = displayValue.length > 1 ? displayValue.slice(0, -1) : '0';
   updateDisplay();
 }
 
+// Hitung hasil (=)
 function calcEquals() {
   try {
-    const full = calcState.expr + calcState.current;
+    const full = expression + displayValue;
     if (!full || full === '0') return;
+    
+    // Convert ^ ke ** untuk JavaScript
     const safe = full.replace(/\^/g, '**').replace(/[^0-9+\-*/().e]/g, '');
     const result = Function('"use strict"; return (' + safe + ')')();
+    
     if (!isFinite(result)) throw new Error('Not finite');
+    
     const display = parseFloat(result.toFixed(10)).toString();
-    const histEntry = prettyDisplay(full) + ' = ' + display;
-    calcState.history.unshift(histEntry);
-    if (calcState.history.length > 8) calcState.history.pop();
-    calcState.expr = prettyDisplay(full) + ' =';
-    calcState.current = display;
-    calcState.justCalc = true;
+    
+    // Simpan ke history
+    calcHistory.unshift(prettyDisplay(full) + ' = ' + display);
+    if (calcHistory.length > 8) calcHistory.pop();
+    
+    expression = prettyDisplay(full) + ' =';
+    displayValue = display;
+    shouldResetDisplay = true;
+    
     document.getElementById('calcStatus').textContent = '// COMPUTED';
     updateHistory();
     updateDisplay();
   } catch(e) {
-    calcState.current = 'ERR';
+    displayValue = 'ERR';
     document.getElementById('calcStatus').className = 'status-text err';
     document.getElementById('calcStatus').textContent = '// ERROR';
     updateDisplay();
-    setTimeout(() => { calcAC(); document.getElementById('calcStatus').className = 'status-text'; }, 1200);
+    setTimeout(() => { 
+      calcAC(); 
+      document.getElementById('calcStatus').className = 'status-text'; 
+    }, 1200);
   }
 }
 
+// All Clear
 function calcAC() {
-  calcState.current = '0'; calcState.expr = ''; calcState.justCalc = false;
+  displayValue = '0';
+  expression = '';
+  shouldResetDisplay = false;
   document.getElementById('calcStatus').className = 'status-text';
   document.getElementById('calcStatus').textContent = '// CLEARED';
   updateDisplay();
 }
 
+// Update history display
 function updateHistory() {
   const el = document.getElementById('calcHistory');
   const L = LANG[currentLang];
-  if (!calcState.history.length) { el.innerHTML = `<div class="history-item">${L.historyEmpty}</div>`; return; }
-  el.innerHTML = calcState.history.map((h, i) =>
+  if (!calcHistory.length) { 
+    el.innerHTML = `<div class="history-item">${L.historyEmpty}</div>`; 
+    return; 
+  }
+  el.innerHTML = calcHistory.map((h, i) =>
     `<div class="history-item">${i === 0 ? '► ' : '  '}${h}</div>`
   ).join('');
 }
 
+// Keyboard support - SIMPLE & INTUITIVE
 document.addEventListener('keydown', e => {
   const activePanel = document.querySelector('.panel.active');
   if (!activePanel || activePanel.id !== 'panel-calc') return;
-  if ('0123456789'.includes(e.key)) calcNum(e.key);
-  else if (e.key === '+') calcOp('+');
-  else if (e.key === '-') calcOp('-');
-  else if (e.key === '*') calcOp('*');
-  else if (e.key === '/') { e.preventDefault(); calcOp('/'); }
-  else if (e.key === '^') calcOp('^');
-  else if (e.key === '(') calcOp('(');
-  else if (e.key === ')') calcOp(')');
-  else if (e.key === '.') calcDot();
-  else if (e.key === 'Enter' || e.key === '=') calcEquals();
-  else if (e.key === 'Escape' || e.key === 'Delete') calcAC();
-  else if (e.key === 'Backspace') calcDel();
+  
+  if ('0123456789'.includes(e.key)) {
+    calcNum(e.key);
+  } else if (e.key === '+' || e.key === '-' || e.key === '*' || e.key === '/') {
+    calcOp(e.key);
+  } else if (e.key === '/') {
+    e.preventDefault();
+    calcOp('/');
+  } else if (e.key === '^') {
+    calcOp('^');
+  } else if (e.key === '(' || e.key === ')') {
+    calcOp(e.key);
+  } else if (e.key === '.' || e.key === ',') {
+    calcDot();
+  } else if (e.key === 'Enter' || e.key === '=') {
+    e.preventDefault();
+    calcEquals();
+  } else if (e.key === 'Escape' || e.key === 'Delete') {
+    calcAC();
+  } else if (e.key === 'Backspace') {
+    calcDel();
+  }
 });
 
 // ===== OPENROUTER HELPER =====
