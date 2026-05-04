@@ -415,7 +415,7 @@ async function callOR(messages, systemPrompt) {
       'X-Title': 'CALC.EXE by SION'
     },
     body: JSON.stringify({
-      model: 'openrouter/auto',
+      model: currentModel || DEFAULT_MODEL,
       messages: systemPrompt
         ? [{ role: 'system', content: systemPrompt }, ...messages]
         : messages,
@@ -432,7 +432,10 @@ async function callOR(messages, systemPrompt) {
   return data.choices[0].message.content;
 }
 // ===== AI MATH =====
-const aiHistory = [];
+
+const DEFAULT_MODEL = 'openrouter/free';
+const aiHistory = []; 
+let currentModel = localStorage.getItem('ai_model') || DEFAULT_MODEL;
 
 // System prompt with LaTeX/KaTeX instructions
 const AI_SYS_PROMPT_ID = `Kamu adalah AI Math Assistant yang helpful dan friendly. 
@@ -774,3 +777,20 @@ function showTyping() {
 document.getElementById('aiInput').addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAI(); }
 });
+
+// ===== MODEL SETTINGS =====
+function toggleModelSettings() {
+  const panel = document.getElementById('modelSettingsPanel');
+  panel.classList.toggle('show');
+}
+
+function saveCustomModel() {
+  const input = document.getElementById('customModelInput');
+  const model = input.value.trim();
+  if (model) {
+    currentModel = model;
+    localStorage.setItem('ai_model', model);
+    alert('Model saved: ' + model);
+    toggleModelSettings();
+  }
+}
