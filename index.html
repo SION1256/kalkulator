@@ -200,6 +200,16 @@
       <div class="ai-header">
         <div class="ai-dot"></div>
         <div class="ai-title">AI MATH</div>
+        <button class="ai-settings-btn" id="aiSettingsBtn" onclick="toggleModelSettings()">⚙️</button>
+      </div>
+
+      <!-- Model Settings Panel -->
+      <div class="model-settings-panel" id="modelSettingsPanel">
+        <div class="model-settings-title">// SET CUSTOM MODEL</div>
+        <div class="model-input-group">
+          <input type="text" id="customModelInput" placeholder="e.g., openrouter/free or mistralai/mistral-7b-instruct" value="openrouter/free">
+          <button onclick="saveCustomModel()">SET</button>
+        </div>
       </div>
 
       <div class="ai-messages" id="aiMessages">

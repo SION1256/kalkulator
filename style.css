@@ -364,13 +364,80 @@ body {
   letter-spacing: 3px;
 }
 
-.ai-model-tag {
+.ai-settings-btn {
   margin-left: auto;
+  background: transparent;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: all 0.2s;
+  padding: 0 5px;
+}
+
+.ai-settings-btn:hover {
+  opacity: 1;
+  transform: rotate(30deg);
+}
+
+.model-settings-panel {
+  display: none;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(0,0,0,0.3);
+}
+
+.model-settings-panel.show {
+  display: block;
+}
+
+.model-settings-title {
   font-family: 'Share Tech Mono';
   font-size: 0.65rem;
   color: var(--dim);
   letter-spacing: 1px;
+  margin-bottom: 8px;
 }
+
+.model-input-group {
+  display: flex;
+  gap: 6px;
+}
+
+.model-input-group input {
+  flex: 1;
+  background: rgba(0,5,15,0.8);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 10px;
+  color: var(--text);
+  font-family: 'Share Tech Mono';
+  font-size: 0.7rem;
+  outline: none;
+}
+
+.model-input-group input:focus {
+  border-color: var(--border-strong);
+}
+
+.model-input-group button {
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  color: var(--cyan);
+  font-family: 'Share Tech Mono';
+  font-size: 0.65rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.model-input-group button:hover {
+  background: rgba(0,255,255,0.1);
+  box-shadow: var(--glow);
+}
+
 
 .ai-messages {
   flex: 1;
