@@ -23,11 +23,12 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 10px;
   position: relative;
   overflow-x: hidden;
   width: 100%;
-  max-width: 100vw;
+  max-width: 411px;
+  margin: 0 auto;
+  padding: 8px;
 }
 
 /* Particle canvas */
@@ -810,29 +811,15 @@ body {
   justify-content: center;
 }
 
-/* Responsive - Mobile Optimization for Thunkable-like sizing */
-@media (max-width: 540px) {
-  .translate-boxes { grid-template-columns: 1fr; }
-  .calc-btn { font-size: 0.85rem; }
-  .convert-header { flex-direction: column; align-items: stretch; }
-  .convert-category-select select { margin-left: 0; }
-  
-  /* Optimize for mobile screen heights ~812-850dp, widths ~411dp */
-  body { padding: 8px; }
-  .wrapper { gap: 10px; }
-  .calc-container { padding: 10px; }
-  .calc-grid { gap: 5px; }
-  .calc-display { padding: 10px 12px; min-height: 70px; }
-  .display-result { font-size: clamp(1.4rem, 5vw, 2rem); }
-  .ai-container { min-height: 350px; max-height: 65vh; }
-  .tab-btn { font-size: 0.7rem; padding: 6px 8px; }
-}
-
-/* Extra small screens */
-@media (max-width: 360px) {
-  .calc-btn { font-size: 0.75rem; }
-  .calc-grid { gap: 4px; }
-  .display-result { font-size: clamp(1.2rem, 5.5vw, 1.8rem); }
-  .app-title { font-size: clamp(1.2rem, 4vw, 1.6rem); letter-spacing: 4px; }
-  .tab-btn { font-size: 0.65rem; padding: 5px 6px; }
-}
+/* Mobile-only sizing - Thunkable-like dimensions (411dp x 812-850dp) */
+.wrapper { gap: 10px; }
+.calc-container { padding: 10px; }
+.calc-grid { gap: 5px; }
+.calc-display { padding: 10px 12px; min-height: 70px; }
+.display-result { font-size: clamp(1.4rem, 5vw, 2rem); }
+.ai-container { min-height: 350px; max-height: 65vh; }
+.tab-btn { font-size: 0.7rem; padding: 6px 8px; }
+.convert-header { flex-direction: column; align-items: stretch; }
+.convert-category-select select { margin-left: 0; }
+.translate-boxes { grid-template-columns: 1fr; }
+.calc-btn { font-size: 0.85rem; }
