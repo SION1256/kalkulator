@@ -836,3 +836,87 @@ body {
   .app-title { font-size: clamp(1.2rem, 4vw, 1.6rem); letter-spacing: 4px; }
   .tab-btn { font-size: 0.65rem; padding: 5px 6px; }
 }
+
+/* AI Message Actions */
+.msg-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  justify-content: flex-start;
+}
+
+.msg-action-btn {
+  background: rgba(0,255,255,0.08);
+  border: 1px solid rgba(0,255,255,0.2);
+  border-radius: 3px;
+  padding: 4px 8px;
+  font-family: 'Share Tech Mono';
+  font-size: 0.6rem;
+  color: var(--dim);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.msg-action-btn:hover {
+  background: rgba(0,255,255,0.15);
+  border-color: var(--border-strong);
+  color: var(--cyan);
+}
+
+.msg-action-btn:active {
+  transform: scale(0.98);
+}
+
+/* Code blocks in AI messages */
+.code-block {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px 10px;
+  margin: 8px 0;
+  overflow-x: auto;
+  font-family: 'Share Tech Mono';
+  font-size: 0.7rem;
+  color: #00ff88;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* KaTeX rendering styles */
+.katex {
+  font-size: 1.1em;
+  color: var(--text);
+}
+
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 8px 0;
+  text-align: center;
+}
+
+/* Tables in AI messages */
+.msg-bubble table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 8px 0;
+  font-size: 0.8rem;
+}
+
+.msg-bubble th, .msg-bubble td {
+  border: 1px solid var(--border);
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.msg-bubble th {
+  background: rgba(0,255,255,0.1);
+  color: var(--cyan);
+}
+
+.msg-bubble tr:nth-child(even) {
+  background: rgba(0,0,0,0.2);
+}
